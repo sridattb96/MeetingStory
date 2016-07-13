@@ -12,6 +12,7 @@ import xlwt
 import datetime
 import shutil
 import math
+import argparse
 
 from pydub import AudioSegment
 from tinytag import TinyTag
@@ -24,7 +25,6 @@ def getDuration(audioPath):
 	    frames = f.getnframes()
 	    rate = f.getframerate()
 	    duration = frames / float(rate)
-	    # print "duration: " + str(duration)
 	    return duration;
 
 # create identification profile
@@ -201,21 +201,33 @@ def split_list(a_list):
 
 # MAIN SCRIPT ------------------------------------------------------------------------
 
+parser = argparse.ArgumentParser(description='Example with long option names')
+
+parser.add_argument('-m', action='store', dest='meeting_file', 
+                    help='Audio file of meeting')
+
+parser.add_argument('-s', nargs='+', action='store', dest='speakers', 
+                    help='Audio file of meeting')
+
+results = parser.parse_args()
+
 # global var
 # api_key = '49438e90c042498d91fbf9a5268bf40d';
 api_key = '63880a66d2c745419fdf3dce703d032c';
-meeting_audio = sys.argv[1];
+meeting_audio = "./meeting/" + results.meeting_file + ".wav";
 audioCount = 0;
 voiceDict = {};
 
 # take input
-input = raw_input('training data: ')
-trainingArr = input.split(' ')
+# input = raw_input('training data: ')
+trainingArr = results.speakers
+trainingArr = ["./training/" + s + "_voice.wav" for s in trainingArr]
+# trainingArr = input.split(' ')
 for i in range(0, len(trainingArr)):
 	if os.path.exists(trainingArr[i]):
 		
 		# get audio file path
-		audioFilePath = trainingArr[i].split('/');
+		audioFilePath = trainingArr[i].split('/')
 		audioFileName = audioFilePath[len(audioFilePath)-1]
 		audioFileArr = audioFileName.split('_')
 
@@ -224,7 +236,7 @@ for i in range(0, len(trainingArr)):
 		speakerName = audioFileArr[0]
 		createEnrollment(id, trainingArr[i]);
 
-		#verify that speaker is enrolled
+		# verify that speaker is enrolled
 		while(True):
 			json_obj = getSpecificProfile(id)
 			if json_obj["enrollmentStatus"] == 'Enrolled':
@@ -239,6 +251,7 @@ for i in range(0, len(trainingArr)):
 	else:
 		print "The path '" + trainingArr[i] + "' doesn't exist...try again"
 
+print meeting_audio
 song = AudioSegment.from_wav(meeting_audio)
 AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), meeting_audio).split('.')
 filepath = AUDIO_FILE[0]

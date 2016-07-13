@@ -200,7 +200,7 @@ def split_list(a_list):
 
 # MAIN SCRIPT ------------------------------------------------------------------------
 
-meeting_audio = sys.argv[1];
+meeting_audio = "./meeting/" + sys.argv[1] + ".wav";
 
 # handle timestamps
 monthdayyear = time.strftime('%m %d %y', time.gmtime(os.path.getmtime(meeting_audio))).split(' ');
