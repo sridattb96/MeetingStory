@@ -2,22 +2,24 @@
 
 ## Overview
 
-MeetingStory takes in audio from a meeting and visualizes the meeting in a way that can potentially help with retaining the contents of that meeting. It utilizes voice recognition and machine learning to capture and process data. 
+MeetingStory takes in audio from a meeting and visualizes the meeting in a way that can potentially help with retaining the contents of that meeting.  
 
-The architecture contains four backend components: speech recognition, speaker recognition, topic modeling, and information extraction. The frontend is the web-based storyline system which uses python's Django and Javascript.
+The architecture contains four backend components: speech recognition, speaker recognition, topic modeling, and information extraction. It utilizes voice recognition and machine learning to capture and process data. The frontend is the web-based storyline system which uses python's Django and Javascript.
 
 The root directory looks like this:
 
 * **meeting** - folder where meeting audio file will go
 * **training** - folder where voice training audio files will go
 * **project** - folder where resulting will be after program is run
+* **streaming-storyline-algo** - folder where storyline timestamp generation scripts locate
+* **visualization** - folder where visualization scripts locate
 * **main.py** - file that contains code for speaker & speech recognition
 * **transcript_generator.py** - file that generates transcript from audio
 * **transcript_processor.py** - file that processes transcript
 * **transcript_analyzer.py** - helper file
 
 
-## Tutorial
+## Backend
 
 #### Step 0: Setting up the recording environment 
 
@@ -65,15 +67,13 @@ Record the meeting in the audio environment set up in Step 0. Name the audio fil
 
 Place it in the meeting folder. This file can be converted to text by the Google Speech API and analyzed alongside the training audio.
 
-#### Step 3: Running MeetingStory
+#### Step 3: Implementing Data Processing
 
 Make sure you are in the root directory, and run the following command:
 
 	python main.py -m [Meeting_title] -s [Person 1’s name] [Person 2’s name] ...
-	
-## Results
 
-Inside ./project/data, you will see a folder with the following format:
+Inside [the data folder](project/data), you will see a folder with the following format:
 
 	[year][month][day][hour][min][second]
 
@@ -84,5 +84,33 @@ The folder name is derived from the timestamp of the meeting audio. For example,
 * **transcript.txt** - transcript of meeting
 * **user.json** - each user and their percentage contribution broken down by time segments
 * **wordcloud.json** - words that appear on the topic bubble of the visualization
+	
+#### Step 4: Generating transcript timestamp for storyline
+
+Run the following command
+		
+	python StreamStoryline.py -i=./your_data.tsv -a=choose_a_algorithm 
+	[
+	-i : input file name 
+	e.g., -i=./Data/sample.tsv 
+	-a : choose the greedy algorithm (comprehensive / onebyone / region / extreme) 
+	e.g., a=region
+	]	
+
+
+Take the last tsv file in [the output folder](streaming-storyline-algo/output) and rename it storyline_default.tsv, put it in [the data folder](project/data)
+	
+#### Step 5: Visualizating it on web browser
+Copy the folder in [the data folder](project/data) you want to viusalize and put it in [the data folder](visualization/data)
+
+Add the name of the folder in 'Select Dataset' section in index.html
+
+Run the following command
+
+	python -m SimpleHTTPServer 8000
+
+Go to localhost:8000 in web browser
+
+
 
 
