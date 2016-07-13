@@ -1,0 +1,10 @@
+scipy-0.17.1
+pydub
+tinytag
+shutil
+xlwt
+SpeechRecognition
+matplotlib
+cycler-0.10.0 
+matplotlib-1.5.1 
+pyparsing-2.1.5
