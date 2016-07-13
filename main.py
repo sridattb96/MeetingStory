@@ -33,8 +33,9 @@ def createIdProfile():
 	data = { "locale":"en-us" };
 	headers = {'Content-Type': 'application/json', 'Ocp-Apim-Subscription-Key': api_key};
 	r = requests.post(url, data=json.dumps(data), headers=headers)
+	time.sleep(5)
+
 	res = r.json();
-	res["identificationProfileId"];
 	return res["identificationProfileId"];
 
 # create enrollment
@@ -46,14 +47,19 @@ def createEnrollment(profileId, voice):
 	headers = {'Ocp-Apim-Subscription-Key': api_key};
 	r = requests.post(url, files=files, headers=headers)
 	# print getOperationStatus(r.headers['Operation-Location'])
+	time.sleep(3)
 
 	files = {'file': open(voice, 'rb')}
 	r = requests.post(url, files=files, headers=headers)
 
+	time.sleep(3)
+
+
 	files = {'file': open(voice, 'rb')}
 	r = requests.post(url, files=files, headers=headers)
 
-	time.sleep(5)
+	time.sleep(3)
+
 
 # get all profiles
 def getAllProfiles():
@@ -251,7 +257,6 @@ for i in range(0, len(trainingArr)):
 	else:
 		print "The path '" + trainingArr[i] + "' doesn't exist...try again"
 
-print meeting_audio
 song = AudioSegment.from_wav(meeting_audio)
 AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), meeting_audio).split('.')
 filepath = AUDIO_FILE[0]

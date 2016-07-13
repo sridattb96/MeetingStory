@@ -19,7 +19,7 @@ def main():
 	else:
 		print "You haven't specified any speakers!"
 
-	# os.system("python ./main.py -m " + results.meeting_file + " -s " + str_speakers)
+	os.system("python ./main.py -m " + results.meeting_file + " -s " + str_speakers)
 	os.system("python ./main2.py " + results.meeting_file)
 
 
