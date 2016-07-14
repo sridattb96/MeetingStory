@@ -147,35 +147,6 @@ def file_len(myfile):
     with open(myfile) as f:
    		return len(f.readlines())
 
-# def createfolder(datestring):
-
-# 	print "creating folder..."
-	
-# 	# create folder
-# 	dirname = "./project/data/" + datestring
-# 	if os.path.exists(dirname):
-# 		shutil.rmtree(dirname)
-# 	os.makedirs(dirname)
-	
-# 	# write in index.txt
-# 	indexFile = "./project/data/index.txt"
-# 	rows = file_len(indexFile)
-# 	with open(indexFile, "a") as myfile:
-# 		myfile.write(str(rows + 1) + "\t" + datestring + "\n")
-	
-# 	# generate transcript (copy from current dir to folder)
-# 	copyfile("./transcript.txt", dirname + "/transcript.txt")
-# 	copyfile("./header.json", dirname + "/header.json")
-# 	# os.remove("./transcript.txt")
-# 	# os.remove("./header.json")
-
-# 	# call run.py
-# 	os.chdir("./project/tot")
-# 	os.system("python run.py 10")
-
-# 	# call script.py
-# 	os.chdir("../../")
-# 	os.system("python ./script.py " + dirname)
 
 def generateHeader(meeting_audio, monthdayyear):
 
@@ -193,6 +164,7 @@ def generateHeader(meeting_audio, monthdayyear):
 	# save data to json file
 	with open('./header.json', 'w') as f:
 	    json.dump(header_json, f)
+
 
 def split_list(a_list):
     half = len(a_list)/2

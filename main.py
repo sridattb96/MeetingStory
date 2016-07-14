@@ -22,5 +22,12 @@ def main():
 	os.system("python ./transcript_generator.py -m " + results.meeting_file + " -s " + str_speakers)
 	os.system("python ./transcript_processor.py " + results.meeting_file)
 
+	api_key = '63880a66d2c745419fdf3dce703d032c';
+	meeting_audio = "./meeting/" + results.meeting_file + ".wav";
+	audioCount = 0;
+	voiceDict = {};
+
+	
+
 
 main()

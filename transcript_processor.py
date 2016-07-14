@@ -42,8 +42,8 @@ def createfolder(datestring):
 	# generate transcript (copy from current dir to folder)
 	copyfile("./transcript.txt", dirname + "/transcript.txt")
 	copyfile("./header.json", dirname + "/header.json")
-	# os.remove("./transcript.txt")
-	# os.remove("./header.json")
+	os.remove("./transcript.txt")
+	os.remove("./header.json")
 
 	# call run.py
 	os.chdir("./project/tot")
