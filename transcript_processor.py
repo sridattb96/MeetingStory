@@ -51,7 +51,7 @@ def createfolder(datestring):
 
 	# call script.py
 	os.chdir("../../")
-	os.system("python ./script.py " + dirname)
+	os.system("python ./transcript_analyzer.py " + dirname)
 
 def generateHeader(meeting_audio, monthdayyear):
 

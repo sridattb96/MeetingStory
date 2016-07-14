@@ -55,7 +55,7 @@ Record a sample audio file of at least 20 seconds for each member in the meeting
 
 Name the audio file in the following format, in all lowercase:
 
-	[Person’s name]_voice.wav
+	[person’s name]_voice.wav
 
 Place it in the **training** folder. This file will train the Microsoft Speaker Recognition API to recognize the individual's voice. Repeat for each member of the meeting.
 
@@ -63,15 +63,15 @@ Place it in the **training** folder. This file will train the Microsoft Speaker 
 
 Record the meeting in the audio environment set up in Step 0. Name the audio file in the following format, in all lowercase:
 
-	[Meeting_title].wav
+	[meeting_title].wav
 
 Place it in the meeting folder. This file can be converted to text by the Google Speech API and analyzed alongside the training audio.
 
-#### Step 3: Implementing Data Processing
+#### Step 3: Checking Results of Data Processing
 
 Make sure you are in the root directory, and run the following command:
 
-	python main.py -m [Meeting_title] -s [Person 1’s name] [Person 2’s name] ...
+	python main.py -m [meeting_title] -s [person 1’s name] [person 2’s name] ...
 
 Inside [the data folder](project/data), you will see a folder with the following format:
 
