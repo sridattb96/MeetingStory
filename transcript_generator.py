@@ -19,16 +19,21 @@ from tinytag import TinyTag
 from os import path
 from shutil import copyfile
 
-# get duration of audio file
-def getDuration(audioPath):
+def get_api_key():
+	return '63880a66d2c745419fdf3dce703d032c'
+
+
+def get_duration(audioPath):
 	with contextlib.closing(wave.open(audioPath,'r')) as f:
 	    frames = f.getnframes()
 	    rate = f.getframerate()
 	    duration = frames / float(rate)
 	    return duration;
 
-# create identification profile
-def createIdProfile():
+
+def create_id_profile():
+	api_key = get_api_key()
+
 	url = 'https://api.projectoxford.ai/spid/v1.0/identificationProfiles';
 	data = { "locale":"en-us" };
 	headers = {'Content-Type': 'application/json', 'Ocp-Apim-Subscription-Key': api_key};
@@ -38,45 +43,47 @@ def createIdProfile():
 	res = r.json();
 	return res["identificationProfileId"];
 
-# create enrollment
-def createEnrollment(profileId, voice):
+
+def create_enrollment(profile_id, voice):
+	api_key = get_api_key()
 
 	print "Training..."
-	url = 'https://api.projectoxford.ai/spid/v1.0/identificationProfiles/' + profileId + '/enroll';
+	url = 'https://api.projectoxford.ai/spid/v1.0/identificationProfiles/' + profile_id + '/enroll';
 	files = {'file': open(voice, 'rb')}
 	headers = {'Ocp-Apim-Subscription-Key': api_key};
 	r = requests.post(url, files=files, headers=headers)
-	# print getOperationStatus(r.headers['Operation-Location'])
 	time.sleep(3)
 
 	files = {'file': open(voice, 'rb')}
 	r = requests.post(url, files=files, headers=headers)
-
 	time.sleep(3)
-
 
 	files = {'file': open(voice, 'rb')}
 	r = requests.post(url, files=files, headers=headers)
-
 	time.sleep(3)
 	
 
-# get specific profile
-def getSpecificProfile(profileId):
-	url = 'https://api.projectoxford.ai/spid/v1.0/identificationProfiles/' + profileId
+def get_specific_profile(profile_id):
+	api_key = get_api_key()
+
+	url = 'https://api.projectoxford.ai/spid/v1.0/identificationProfiles/' + profile_id
 	headers = {'Ocp-Apim-Subscription-Key': api_key};
 	r = requests.get(url, headers=headers)
 	return r.json()
 
-# get operation status
+
 def getOperationStatus(url):
+	api_key = get_api_key()
+
 	headers = {'Content-Type': 'application/json', 'Ocp-Apim-Subscription-Key': api_key};
 	r = requests.get(url, headers=headers)
 	return r.json()
 
-def speechRecognition(start, end):
+
+def speechRecognition(song, start, end):
 	segment = song[start:end] 
-	filename = filepath + "speech.wav"
+	filename = "speech.wav"
+
 	segment.export(filename, format="wav")
 	r = sr.Recognizer()
 	with sr.AudioFile(filename) as source:
@@ -84,31 +91,33 @@ def speechRecognition(start, end):
 	try:
 		text = r.recognize_google(audio);
 		os.remove(filename)
+		print text
 		return text
 	except sr.UnknownValueError:
 	    print("Google Speech Recognition could not understand audio")
+	    os.remove(filename)
 	    return ""
 	except sr.RequestError as e:
 	    print("Could not request results from Google Speech Recognition service; {0}".format(e))
+	    os.remove(filename)
 	    return ""
 
-	os.remove(filename)
-	return text
 
-def speakerRecognition(start, end, inc):
+def speakerRecognition(song, start, end, inc, voiceDict):
 	segment = song[start:end]
 	limit = int(math.ceil(63/inc));
 	for i in range(0, limit):
 		segment += song[start:end]
-	filename = filepath + str(x) + ".wav" # this is for identifying speaker
+	# filename = filepath + str(x) + ".wav" # this is for identifying speaker
+	filename = "speaker.wav"
 	segment.export(filename, format="wav")
 	name = identifySpeaker(voiceDict, filename) 
 	os.remove(filename)
 	return name;
 
-# identify speaker
+
 def identifySpeaker(voiceDict, voice_sample):
-	# print "Identifying speakers..."
+	api_key = get_api_key()
 
 	voiceStrings = ''
 	for key in voiceDict:
@@ -126,7 +135,7 @@ def identifySpeaker(voiceDict, voice_sample):
 			time.sleep(5)
 			opStatus = getOperationStatus(r.headers['Operation-Location']);
 			time.sleep(3)
-			print opStatus
+			# print opStatus
 			if opStatus['processingResult']:
 				if opStatus['processingResult']['identifiedProfileId'] != "00000000-0000-0000-0000-000000000000":
 					name = voiceDict[opStatus['processingResult']['identifiedProfileId']]
@@ -136,146 +145,79 @@ def identifySpeaker(voiceDict, voice_sample):
 						name = "Unknown Speaker"
 						break
 		else:
-			time.sleep(5)
-			print "try again"
+			print "Error: The key 'Operation-Location' doesn't exist in r.headers."
+			exit(1)
 
 	print "This is " + name + "'s voice."
 	return name
-
-# get length of file
-def file_len(myfile):
-    with open(myfile) as f:
-   		return len(f.readlines())
-
-
-def generateHeader(meeting_audio, monthdayyear):
-
-	arr = meeting_audio.split('/')
-	meetingArr = arr[len(arr)-1].split('.')[0].split('_');
-	meetingName = ' '.join(meetingArr);
-	monthArr = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-	meetingDate = monthArr[int(monthdayyear[0])] + ' ' + monthdayyear[1] + ', ' + '20' + monthdayyear[2];
-
-	# create json object
-	header_json = {};
-	header_json["title"] = meetingName;
-	header_json["date"] = meetingDate;
-
-	# save data to json file
-	with open('./header.json', 'w') as f:
-	    json.dump(header_json, f)
 
 
 def split_list(a_list):
     half = len(a_list)/2
     return a_list[:half], a_list[half:]
 
-# MAIN SCRIPT ------------------------------------------------------------------------
 
-parser = argparse.ArgumentParser(description='Example with long option names')
+def train_speakers(speaker_arr, voice_dict):
+	"""
+	Trains each speaker specified in the command. 
+	"""
+	for i in range(0, len(speaker_arr)):
+		speaker_name = speaker_arr[i]
+		speaker_path = "./training/" + speaker_arr[i] + "_voice.wav"
+		if os.path.exists(speaker_path):
+			
+			# enroll speaker
+			profile_id = create_id_profile();
+			create_enrollment(profile_id, speaker_path);
 
-parser.add_argument('-m', action='store', dest='meeting_file', 
-                    help='Audio file of meeting')
-
-parser.add_argument('-s', nargs='+', action='store', dest='speakers', 
-                    help='Audio file of meeting')
-
-results = parser.parse_args()
-
-# global var
-# api_key = '49438e90c042498d91fbf9a5268bf40d';
-api_key = '63880a66d2c745419fdf3dce703d032c';
-meeting_audio = "./meeting/" + results.meeting_file + ".wav";
-audioCount = 0;
-voiceDict = {};
-
-# take input
-# input = raw_input('training data: ')
-trainingArr = results.speakers
-trainingArr = ["./training/" + s + "_voice.wav" for s in trainingArr]
-# trainingArr = input.split(' ')
-for i in range(0, len(trainingArr)):
-	if os.path.exists(trainingArr[i]):
-		
-		# get audio file path
-		audioFilePath = trainingArr[i].split('/')
-		audioFileName = audioFilePath[len(audioFilePath)-1]
-		audioFileArr = audioFileName.split('_')
-
-		# enroll speaker
-		id = createIdProfile();
-		speakerName = audioFileArr[0]
-		createEnrollment(id, trainingArr[i]);
-
-		# verify that speaker is enrolled
-		while(True):
-			json_obj = getSpecificProfile(id)
+			# verify that speaker is enrolled
+			json_obj = get_specific_profile(profile_id)
 			if json_obj["enrollmentStatus"] == 'Enrolled':
-				print speakerName + " has been enrolled."
-				voiceDict[id] = speakerName;
-				audioCount = audioCount + 1;
-				break
+				print speaker_name + " has been enrolled."
+				voice_dict[profile_id] = speaker_name;
 			else:
 				print json_obj
-				print "Something went wrong with path '" + trainingArr[i] + "'...try again."
-				exit()
-	else:
-		print "The path '" + trainingArr[i] + "' doesn't exist...try again"
+				print "Something went wrong with path '" + speaker_path + "'...try again."
+				exit(1)
+		else:
+			print "The path '" + speaker_path + "' doesn't exist...try again"
+			exit(1)
 
-song = AudioSegment.from_wav(meeting_audio)
-AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), meeting_audio).split('.')
-filepath = AUDIO_FILE[0]
 
-x = 0;
-inc = 5;
-start = 0;
-end = inc * 1000;
+def create_transcript(meeting_path, voice_dict):
+	song = AudioSegment.from_wav(meeting_path)
 
-duration = getDuration(meeting_audio)
-outputFile = "transcript.txt"
-f = open(outputFile, 'w')
+	count = 0
+	inc = 5;
+	start = 0;
+	end = inc * 1000;
 
-# handle timestamps
-monthdayyear = time.strftime('%m %d %y', time.gmtime(os.path.getmtime(meeting_audio))).split(' ');
-timestamp = time.ctime(path.getctime(meeting_audio)).split(' ');
+	duration = get_duration(meeting_path)
+	f = open("transcript.txt", 'w')
 
-# print timestamp
-month = monthdayyear[0]
-day = monthdayyear[1]
-year = monthdayyear[2]
-times = timestamp[-2].split(':')
-hour = times[0]
-minute = times[1]
-second = times[2]
-d = datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
-datestring = year + month + day + hour + minute + second;
+	d = datetime.datetime.fromtimestamp(os.path.getmtime(meeting_path))
 
-while True:
+	while True:
+		print "From " + str(start/1000) + " to " + str(end/1000)
 
-	x += 1;
-	print "From " + str(start/1000) + " to " + str(end/1000);
+		text = speechRecognition(song, start, end);
+		name = speakerRecognition(song, start, end, inc, voice_dict)
 
-	# speech & speech recognition
-	text = speechRecognition(start, end);
-	name = speakerRecognition(start, end, inc)
+		start += inc * 1000;
+		end += inc * 1000;
 
-	start += inc * 1000;
-	end += inc * 1000;
+		# write transcript 
+		if start < duration * 1000 and end < duration * 1000:
+			f.write(str(d) + "\t" + name + "\t" + text + "\n")
+		else:
+			A = text.split(' ')
+			B, C = split_list(A)
+			f.write(str(d) + "\t" + name + "\t" + ' '.join(B) + "\n")
+			f.write(str(d) + "\t" + name + "\t" + ' '.join(C) + "\n")
+			break;
 
-	# write transcript 
-	if start < duration * 1000 and end < duration * 1000:
-		f.write(str(d) + "\t" + name + "\t" + text + "\n")
-	else:
-		A = text.split(' ')
-		B, C = split_list(A)
-		f.write(str(d) + "\t" + name + "\t" + ' '.join(B) + "\n")
-		f.write(str(d) + "\t" + name + "\t" + ' '.join(C) + "\n")
-		break;
+		d += datetime.timedelta(seconds = inc)
+		count += 1
 
-	d += datetime.timedelta(seconds = inc)
-
-print "Transcription successful!"
-
-generateHeader(meeting_audio, monthdayyear);
-
+	print "Transcript completed!"
 

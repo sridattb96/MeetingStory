@@ -1,6 +1,9 @@
 import os
 import sys
 import argparse
+import transcript_generator
+import organizer
+import transcript_processor
 
 def main():
 
@@ -18,16 +21,31 @@ def main():
 		str_speakers = ' '.join(results.speakers)
 	else:
 		print "You haven't specified any speakers!"
+		exit(1)
 
-	os.system("python ./transcript_generator.py -m " + results.meeting_file + " -s " + str_speakers)
-	os.system("python ./transcript_processor.py " + results.meeting_file)
+	voice_dict = {};
+	meeting_path = "./meeting/" + results.meeting_file + ".wav";
 
-	api_key = '63880a66d2c745419fdf3dce703d032c';
-	meeting_audio = "./meeting/" + results.meeting_file + ".wav";
-	audioCount = 0;
-	voiceDict = {};
+	# # train speakers
+	transcript_generator.train_speakers(results.speakers, voice_dict)
 
-	
+	# # generate transcript
+	transcript_generator.create_transcript(meeting_path, voice_dict)
+
+	# create folder and header
+	organizer.create_header(meeting_path, results.meeting_file)
+	dirname = organizer.create_folder(meeting_path)
+
+	# process transcript
+	os.chdir("./project/tot")
+	os.system("python run.py 10")
+	os.chdir("../../")
+
+	transcript_processor.get_user_contribution(dirname)
+
+
+
+
 
 
 main()
